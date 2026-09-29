@@ -1,8 +1,8 @@
 # KLHB-FED-26-34-Personal-Bank-Ledger-Bank-Statement
 # **Project Title:**
-# ** Project Supervisor:**
+# **Project Supervisor:**
 # **Team Members**
-# ** Project Abstract:**
+# **Project Abstract:**
 # **Week 1:**
 # **Setup Details:**
 # **Execution Details:**
