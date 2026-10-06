@@ -31,3 +31,31 @@ void displayBalance() {
 System.out.println("Current Balance: " + balance);
 }
 }
+class SavingsAccount extends BankAccount {
+
+double interest = 500;
+
+void addInterest() {
+balance = balance + interest;
+}
+}
+
+public class BankLedger {
+
+static Scanner sc = new Scanner(System.in);
+
+static void saveTransaction(String type, double amount, double balance) {
+
+try {
+FileWriter file = new FileWriter("statement.txt", true);
+
+file.write(type + " : " + amount
++ " | Balance : " + balance + "\n");
+
+file.close();
+
+} catch (IOException e) {
+System.out.println("File error");
+}
+}
+
