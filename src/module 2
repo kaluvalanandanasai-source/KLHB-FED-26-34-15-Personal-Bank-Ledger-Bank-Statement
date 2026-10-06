@@ -1,0 +1,48 @@
+static void generateStatement(SavingsAccount account) {
+
+try {
+FileWriter file = new FileWriter("statement.txt");
+
+file.write("========== BANK STATEMENT ==========\n");
+file.write("Account Holder : " + account.name + "\n");
+file.write("Account Number : " + account.accountNumber + "\n\n");
+
+file.write("Transaction Amount Balance\n");
+file.write("--------------------------------------\n");
+
+// Read previous transactions
+java.io.BufferedReader reader =
+new java.io.BufferedReader(
+new java.io.FileReader("transactions.txt"));
+
+String line;
+
+while ((line = reader.readLine()) != null) {
+file.write(line + "\n");
+}
+
+reader.close();
+
+file.write("--------------------------------------\n");
+file.write(String.format(
+"Total Deposit %.2f\n",
+account.totalDeposit));
+
+file.write(String.format(
+"Total Withdraw %.2f\n",
+account.totalWithdraw));
+
+file.write(String.format(
+"Final Balance %.2f\n",
+account.balance));
+
+file.write("=====================================\n");
+
+file.close();
+
+System.out.println("Statement generated successfully");
+
+} catch (IOException e) {
+System.out.println("Unable to generate statement");
+}
+}
