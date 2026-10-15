@@ -1,0 +1,117 @@
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+class TransactionRecord {
+    String type;
+    double amount;
+
+    TransactionRecord(String type, double amount) {
+        this.type = type;
+        this.amount = amount;
+    }
+
+    @Override
+    public String toString() {
+        return type + ": ₹" + amount;
+    }
+}
+
+public class Module5_StringsFiles {
+    public static void main(String[] args) {
+        // String handling
+        String record = "  Deposit,500.00  ";
+        String cleaned = record.trim();
+        String[] fields = cleaned.split(",");
+
+        System.out.println("Cleaned record: " + cleaned);
+        System.out.println(
+            "Joined fields: " + String.join(" | ", fields)
+        );
+
+        boolean validAmount = fields.length == 2
+                && fields[1].trim().matches("\\d+(\\.\\d{1,2})?");
+        System.out.println("Valid amount format: " + validAmount);
+
+        // StringBuilder and StringBuffer
+        StringBuilder statement = new StringBuilder();
+        statement.append("BANK STATEMENT\n");
+        statement.append("Deposit: ₹500.00\n");
+        statement.append("Withdrawal: ₹100.00\n");
+        System.out.println(statement);
+
+        StringBuffer footer =
+            new StringBuffer("Statement generated successfully.");
+        System.out.println(footer);
+
+        // Sorting and searching
+        List<TransactionRecord> transactions = new ArrayList<>();
+        transactions.add(new TransactionRecord("Deposit", 500));
+        transactions.add(new TransactionRecord("Withdrawal", 100));
+        transactions.add(new TransactionRecord("Deposit", 1200));
+
+        transactions.sort(
+            Comparator.comparingDouble(t -> t.amount)
+        );
+
+        System.out.println("Sorted transactions:");
+        transactions.forEach(System.out::println);
+
+        boolean found = transactions.stream()
+                .anyMatch(t -> t.amount == 1200);
+        System.out.println("Amount 1200 found: " + found);
+
+        // File writing, appending and reading
+        Path file = Path.of("transactions.txt");
+
+        try {
+            Files.writeString(
+                file,
+                "Deposit,500.00\n",
+                StandardOpenOption.CREATE,
+                StandardOpenOption.APPEND
+            );
+
+            try (var reader = Files.newBufferedReader(file)) {
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    if (line.isBlank()) {
+                        continue;
+                    }
+
+                    String[] parts = line.split(",");
+
+                    if (parts.length != 2) {
+                        System.out.println(
+                            "Skipping malformed record: " + line
+                        );
+                        continue;
+                    }
+
+                    try {
+                        double amount =
+                            Double.parseDouble(parts[1].trim());
+
+                        System.out.println(
+                            "Transaction: " + parts[0].trim()
+                            + ", Amount: ₹" + amount
+                        );
+                    } catch (NumberFormatException e) {
+                        System.out.println(
+                            "Invalid amount in record: " + line
+                        );
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println("File error: " + e.getMessage());
+        }
+    }
+}
