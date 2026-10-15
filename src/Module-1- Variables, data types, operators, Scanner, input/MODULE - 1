@@ -1,0 +1,33 @@
+import java.util.Scanner;
+
+
+public class Module1_JavaFoundations {
+    public static void main(String[] args) {
+        try (Scanner input = new Scanner(System.in)) {
+            System.out.print("Enter account holder name: ");
+            String name = input.nextLine();
+
+            System.out.print("Enter opening balance (₹): ");
+            double balance = input.nextDouble();
+
+            int accountNumber = 123456;
+            char accountType = 'S';
+            boolean active = true;
+
+            double bonus = 250;
+            double updatedBalance = balance + bonus;
+            double equalShare = (double) updatedBalance / 3; // casting
+            boolean hasMinimumBalance = updatedBalance >= 1000 && active;
+            int precedenceExample = 10 + 2 * 3; // multiplication first
+
+            System.out.println("\\n--- ACCOUNT SUMMARY ---");
+            System.out.printf("Holder: %s%nAccount number: %d%nType: %c%n",
+                    name, accountNumber, accountType);
+            System.out.printf("Opening balance: ₹%.2f%nBonus: ₹%.2f%nUpdated balance: ₹%.2f%n",
+                    balance, bonus, updatedBalance);
+            System.out.printf("Equal share (3 parts): ₹%.2f%n", equalShare);
+            System.out.println("Active with minimum balance: " + hasMinimumBalance);
+            System.out.println("10 + 2 * 3 = " + precedenceExample);
+        }
+    }
+}
