@@ -1,0 +1,35 @@
+
+import java.util.Scanner;
+
+public class Module1_JavaFoundations {
+    public static void main(String[] args) {
+        try (Scanner input = new Scanner(System.in)) {
+            System.out.print("Enter account holder name: ");
+            String name = input.nextLine();
+
+            System.out.print("Enter opening balance: ");
+            double balance = input.nextDouble();
+
+            int accountNumber = 123456;
+            char accountType = 'S';
+            boolean active = true;
+
+            double bonus = 250;
+            double updatedBalance = balance + bonus;
+            double equalShare = (double) updatedBalance / 3;
+
+            boolean eligible = updatedBalance >= 1000 && active;
+            int result = 10 + 2 * 3;
+
+            System.out.println("\n--- ACCOUNT SUMMARY ---");
+            System.out.printf("Holder: %s%n", name);
+            System.out.printf("Account number: %d%n", accountNumber);
+            System.out.printf("Account type: %c%n", accountType);
+            System.out.printf("Opening balance: ₹%.2f%n", balance);
+            System.out.printf("Updated balance: ₹%.2f%n", updatedBalance);
+            System.out.printf("Equal share: ₹%.2f%n", equalShare);
+            System.out.println("Eligible: " + eligible);
+            System.out.println("10 + 2 * 3 = " + result);
+        }
+    }
+}
