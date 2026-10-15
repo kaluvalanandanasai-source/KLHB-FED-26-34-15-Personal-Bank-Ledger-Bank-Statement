@@ -1,0 +1,71 @@
+
+import java.util.Arrays;
+
+public class Module3_MethodsArrays {
+
+    static double total(double a, double b) {
+        return a + b;
+    }
+
+    // Method overloading
+    static double total(double a, double b, double c) {
+        return a + b + c;
+    }
+
+    // Recursive method
+    static int countDigits(int number) {
+        if (number < 10) {
+            return 1;
+        }
+        return 1 + countDigits(number / 10);
+    }
+
+    public static void main(String[] args) {
+        double[] deposits = {500, 200, 1200, 350};
+        double sum = 0;
+
+        // Enhanced for loop
+        for (double amount : deposits) {
+            sum = total(sum, amount);
+        }
+
+        System.out.println("Deposits: " + Arrays.toString(deposits));
+        System.out.println("Total deposits: ₹" + sum);
+
+        System.out.println("Two amounts: " + total(100, 250));
+        System.out.println("Three amounts: " + total(100, 250, 50));
+
+        // Searching an array
+        double target = 1200;
+        for (int i = 0; i < deposits.length; i++) {
+            if (deposits[i] == target) {
+                System.out.println("Found at index: " + i);
+                break;
+            }
+        }
+
+        System.out.println(
+            "Digits in account number: " + countDigits(123456)
+        );
+
+        // Two-dimensional array
+        int[][] monthlyTransactions = {
+            {2, 1, 3},
+            {4, 2, 1}
+        };
+
+        int grandTotal = 0;
+
+        for (int[] month : monthlyTransactions) {
+            for (int count : month) {
+                grandTotal += count;
+            }
+        }
+
+        System.out.println(
+            "Transaction matrix: " +
+            Arrays.deepToString(monthlyTransactions)
+        );
+        System.out.println("Total transactions: " + grandTotal);
+    }
+}
