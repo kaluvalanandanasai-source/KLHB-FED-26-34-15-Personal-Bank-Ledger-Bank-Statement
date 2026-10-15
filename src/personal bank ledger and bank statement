@@ -1,0 +1,347 @@
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+public class Main {
+
+    static Scanner sc = new Scanner(System.in);
+    static List<BankAccount> accounts = new ArrayList<>();
+
+    static class Transaction {
+        String type;
+        double amount;
+        double balance;
+        LocalDateTime dateTime;
+
+        Transaction(String type, double amount, double balance) {
+            this.type = type;
+            this.amount = amount;
+            this.balance = balance;
+            this.dateTime = LocalDateTime.now();
+        }
+
+        public String toString() {
+            return String.format("%-20s %-12s ₹%-10.2f ₹%-10.2f",
+                    dateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
+                    type, amount, balance);
+        }
+    }
+
+    interface Printable {
+        void printDetails();
+    }
+
+    static class BankAccount implements Printable {
+        private String name;
+        private String accountNumber;
+        private double balance;
+        private List<Transaction> transactions = new ArrayList<>();
+
+        BankAccount(String name, String accountNumber, double balance) {
+            if (balance < 0)
+                throw new IllegalArgumentException("Balance cannot be negative.");
+
+            this.name = name;
+            this.accountNumber = accountNumber;
+            this.balance = balance;
+
+            if (balance > 0)
+                transactions.add(new Transaction("OPENING", balance, balance));
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getAccountNumber() {
+            return accountNumber;
+        }
+
+        public double getBalance() {
+            return balance;
+        }
+
+        public List<Transaction> getTransactions() {
+            return new ArrayList<>(transactions);
+        }
+
+        public void deposit(double amount) {
+            if (amount <= 0 || !Double.isFinite(amount))
+                throw new IllegalArgumentException("Enter a valid positive amount.");
+
+            balance += amount;
+            transactions.add(new Transaction("DEPOSIT", amount, balance));
+        }
+
+        public void withdraw(double amount) {
+            if (amount <= 0 || !Double.isFinite(amount))
+                throw new IllegalArgumentException("Enter a valid positive amount.");
+
+            if (amount > balance)
+                throw new IllegalArgumentException("Insufficient balance.");
+
+            balance -= amount;
+            transactions.add(new Transaction("WITHDRAWAL", amount, balance));
+        }
+
+        public void printDetails() {
+            System.out.println("\nAccount Holder : " + name);
+            System.out.println("Account Number : " + accountNumber);
+            System.out.printf("Current Balance: ₹%.2f%n", balance);
+        }
+
+        public String toString() {
+            return name + " (" + accountNumber + ")";
+        }
+    }
+
+    static BankAccount findAccount(String number) {
+        for (BankAccount account : accounts) {
+            if (account.getAccountNumber().equalsIgnoreCase(number))
+                return account;
+        }
+        return null;
+    }
+
+    static BankAccount getAccount() {
+        System.out.print("Enter account number: ");
+        String number = sc.nextLine().trim();
+
+        BankAccount account = findAccount(number);
+
+        if (account == null)
+            throw new IllegalArgumentException("Account not found.");
+
+        return account;
+    }
+
+    static int readInt(String message) {
+        while (true) {
+            System.out.print(message);
+            try {
+                return Integer.parseInt(sc.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Enter a valid whole number.");
+            }
+        }
+    }
+
+    static double readAmount(String message) {
+        while (true) {
+            System.out.print(message);
+            try {
+                double amount = Double.parseDouble(sc.nextLine().trim());
+                if (Double.isFinite(amount) && amount >= 0)
+                    return amount;
+
+                System.out.println("Enter a valid non-negative amount.");
+            } catch (NumberFormatException e) {
+                System.out.println("Enter a valid amount.");
+            }
+        }
+    }
+
+    static void createAccount() {
+        System.out.print("Enter account holder name: ");
+        String name = sc.nextLine().trim();
+
+        if (name.isEmpty())
+            throw new IllegalArgumentException("Name cannot be empty.");
+
+        System.out.print("Enter account number: ");
+        String number = sc.nextLine().trim();
+
+        if (number.isEmpty())
+            throw new IllegalArgumentException("Account number cannot be empty.");
+
+        if (findAccount(number) != null)
+            throw new IllegalArgumentException("Account number already exists.");
+
+        double openingBalance = readAmount("Enter opening balance: ₹");
+
+        BankAccount account = new BankAccount(name, number, openingBalance);
+        accounts.add(account);
+
+        System.out.println("Account created successfully!");
+        account.printDetails();
+    }
+
+    static void depositMoney() {
+        BankAccount account = getAccount();
+        double amount = readAmount("Enter deposit amount: ₹");
+        account.deposit(amount);
+        System.out.printf("Deposit successful! Balance: ₹%.2f%n",
+                account.getBalance());
+    }
+
+    static void withdrawMoney() {
+        BankAccount account = getAccount();
+        double amount = readAmount("Enter withdrawal amount: ₹");
+        account.withdraw(amount);
+        System.out.printf("Withdrawal successful! Balance: ₹%.2f%n",
+                account.getBalance());
+    }
+
+    static void viewAccount() {
+        getAccount().printDetails();
+    }
+
+    static void listAccounts() {
+        if (accounts.isEmpty()) {
+            System.out.println("No accounts found.");
+            return;
+        }
+
+        System.out.println("\n========== ALL ACCOUNTS ==========");
+
+        accounts.forEach(account ->
+                System.out.printf("%s | %s | Balance: ₹%.2f%n",
+                        account.getAccountNumber(),
+                        account.getName(),
+                        account.getBalance()));
+    }
+
+    static void showStatement() {
+        BankAccount account = getAccount();
+
+        System.out.println("\n========== BANK STATEMENT ==========");
+        account.printDetails();
+
+        System.out.printf("%-20s %-12s %-11s %-11s%n",
+                "Date & Time", "Type", "Amount", "Balance");
+
+        System.out.println("----------------------------------------------------------");
+
+        List<Transaction> transactions = account.getTransactions();
+
+        if (transactions.isEmpty())
+            System.out.println("No transactions found.");
+        else
+            transactions.forEach(System.out::println);
+
+        System.out.println("====================================");
+    }
+
+    static void saveStatement() throws IOException {
+        BankAccount account = getAccount();
+
+        Path directory = Path.of("statements");
+        Files.createDirectories(directory);
+
+        String safeNumber = account.getAccountNumber()
+                .replaceAll("[^a-zA-Z0-9_-]", "_");
+
+        Path file = directory.resolve("statement_" + safeNumber + ".txt");
+
+        List<String> statement = new ArrayList<>();
+
+        statement.add("PERSONAL BANK LEDGER");
+        statement.add("Account Holder: " + account.getName());
+        statement.add("Account Number: " + account.getAccountNumber());
+        statement.add(String.format("Current Balance: ₹%.2f",
+                account.getBalance()));
+        statement.add("");
+        statement.add(String.format("%-20s %-12s %-11s %-11s",
+                "Date & Time", "Type", "Amount", "Balance"));
+
+        statement.addAll(account.getTransactions().stream()
+                .map(Transaction::toString)
+                .collect(Collectors.toList()));
+
+        Files.write(file, statement, StandardCharsets.UTF_8);
+
+        System.out.println("Statement saved successfully: " + file);
+    }
+
+    static void searchTransactions() {
+        BankAccount account = getAccount();
+
+        System.out.print("Enter transaction type (OPENING/DEPOSIT/WITHDRAWAL): ");
+        String type = sc.nextLine().trim().toUpperCase();
+
+        Predicate<Transaction> filter =
+                transaction -> transaction.type.equalsIgnoreCase(type);
+
+        List<Transaction> results = account.getTransactions().stream()
+                .filter(filter)
+                .collect(Collectors.toList());
+
+        if (results.isEmpty()) {
+            System.out.println("No matching transactions found.");
+        } else {
+            System.out.println("\nMatching Transactions:");
+            results.forEach(System.out::println);
+        }
+    }
+
+    public static void main(String[] args) {
+        boolean running = true;
+
+        System.out.println("======================================");
+        System.out.println("   PERSONAL BANK LEDGER SYSTEM");
+        System.out.println("======================================");
+
+        while (running) {
+            System.out.println("\n--------------- MENU ---------------");
+            System.out.println("1. Create Account");
+            System.out.println("2. Deposit Money");
+            System.out.println("3. Withdraw Money");
+            System.out.println("4. View Account Details");
+            System.out.println("5. List All Accounts");
+            System.out.println("6. Display Bank Statement");
+            System.out.println("7. Save Statement to File");
+            System.out.println("8. Search Transactions");
+            System.out.println("9. Exit");
+            System.out.println("-------------------------------------");
+
+            int choice = readInt("Enter your choice: ");
+
+            try {
+                switch (choice) {
+                    case 1:
+                        createAccount();
+                        break;
+                    case 2:
+                        depositMoney();
+                        break;
+                    case 3:
+                        withdrawMoney();
+                        break;
+                    case 4:
+                        viewAccount();
+                        break;
+                    case 5:
+                        listAccounts();
+                        break;
+                    case 6:
+                        showStatement();
+                        break;
+                    case 7:
+                        saveStatement();
+                        break;
+                    case 8:
+                        searchTransactions();
+                        break;
+                    case 9:
+                        running = false;
+                        System.out.println("Thank you for using Personal Bank Ledger!");
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Select 1-9.");
+                }
+            } catch (IllegalArgumentException e) {
+                System.out.println("Error: " + e.getMessage());
+            } catch (IOException e) {
+                System.out.println("File error: " + e.getMessage());
+            }
+        }
+
+        sc.close();
+    }
+}
