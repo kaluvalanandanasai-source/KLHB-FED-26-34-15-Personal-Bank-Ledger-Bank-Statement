@@ -1,0 +1,132 @@
+
+interface Printable {
+    void printDetails();
+}
+
+class BankAccount {
+    private static int accountCount = 0;
+    private final String holder;
+    private final int accountNumber;
+    protected double balance;
+
+    public BankAccount(
+            String holder, int accountNumber, double openingBalance) {
+        if (openingBalance < 0) {
+            throw new IllegalArgumentException(
+                "Opening balance cannot be negative."
+            );
+        }
+
+        this.holder = holder;
+        this.accountNumber = accountNumber;
+        this.balance = openingBalance;
+        accountCount++;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void deposit(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException(
+                "Deposit must be positive."
+            );
+        }
+        balance += amount;
+    }
+
+    public void withdraw(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException(
+                "Withdrawal must be positive."
+            );
+        }
+        if (amount > balance) {
+            throw new IllegalStateException(
+                "Insufficient balance."
+            );
+        }
+        balance -= amount;
+    }
+
+    public String accountType() {
+        return "General account";
+    }
+
+    public static int getAccountCount() {
+        return accountCount;
+    }
+
+    @Override
+    public String toString() {
+        return "Holder: " + holder
+                + ", Account: " + accountNumber
+                + ", Balance: ₹" + String.format("%.2f", balance);
+    }
+}
+
+class SavingsAccount extends BankAccount implements Printable {
+    private final double interestRate;
+
+    public SavingsAccount(
+            String holder, int number,
+            double balance, double interestRate) {
+        super(holder, number, balance);
+
+        if (interestRate < 0) {
+            throw new IllegalArgumentException(
+                "Interest rate cannot be negative."
+            );
+        }
+        this.interestRate = interestRate;
+    }
+
+    public void addInterest() {
+        balance += balance * interestRate / 100;
+    }
+
+    @Override
+    public String accountType() {
+        return "Savings account";
+    }
+
+    @Override
+    public void printDetails() {
+        System.out.println(this);
+        System.out.println("Type: " + accountType());
+    }
+}
+
+public class Module4_OOPExceptions {
+    public static void main(String[] args) {
+        try {
+            SavingsAccount account =
+                new SavingsAccount("Arun", 123456, 5000, 2);
+
+            account.deposit(500);
+            account.withdraw(200);
+            account.addInterest();
+
+            // Polymorphism
+            BankAccount reference = account;
+            System.out.println(reference.accountType());
+
+            // Interface implementation
+            account.printDetails();
+
+            System.out.println(
+                "Accounts created: " + BankAccount.getAccountCount()
+            );
+
+            // Demonstrate exception handling
+            account.withdraw(100000);
+
+        } catch (IllegalArgumentException |
+                 IllegalStateException e) {
+            System.out.println("Transaction error: " + e.getMessage());
+        } finally {
+            System.out.println("Operation completed.");
+        }
+    }
+}
