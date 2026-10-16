@@ -87,6 +87,7 @@ public class Main {
                 throw new IllegalArgumentException("Insufficient balance.");
 
             balance -= amount;
+
             transactions.add(new Transaction("WITHDRAWAL", amount, balance));
         }
 
